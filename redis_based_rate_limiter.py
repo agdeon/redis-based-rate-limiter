@@ -5,21 +5,26 @@ from functools import wraps
 
 def rate_limiter(thread_name, calls, period, host='localhost', port=6379, db=0, decode_responses=True):
     """
-    Decorator for limiting the frequency of function calls. If necessary to limit the number of
-    function calls from different threads or other scripts.
-    @rate_limiter(name="user1", calls=1, period=2)
-
-    :param thread_name: The name of the counter in the Redis database
-    :param calls: The maximum number of calls
-    :param period: Time period in seconds
-    :param host: The address of the installed and running Redis server (host='localhost')
-    :param port: The port of the Redis server (port=637)
-    :param db: The database number
-    :param decode_responses: Whether to decode strings (decode_responses=True)
-
-    !! If function calls are too frequent, for example in a while loop, it creates a heavy load
-    !! on the Redis server and CPU. Function calls should have minimal delay (e.g. 0.05 s).
-    !! To achieve this, use @ensure_delay(0.05)
+    Decorator to limit the frequency of function calls, useful for controlling call rate
+    from different threads or scripts.
+    
+    Usage example:
+        @rate_limiter(name="user1", calls=1, period=2)
+    
+    Parameters:
+        thread_name (str): The key for storing the counter in the Redis database.
+        calls (int): The maximum number of allowed calls within the given time period.
+        period (int): The time period (in seconds) during which the function call limit is enforced.
+        host (str): The address of the running Redis server (default is 'localhost').
+        port (int): The port of the Redis server (default is 6379).
+        db (int): The Redis database number (default is 0).
+        decode_responses (bool): Whether to decode Redis responses as strings (default is True).
+    
+    Warning:
+        - Frequent function calls (e.g., within a tight loop) can result in high load on the
+          Redis server and the CPU. To avoid excessive load, ensure there is a minimal delay
+          between calls (e.g., 0.05 seconds).
+        - To enforce such a delay, consider using the @ensure_delay(0.05) decorator in combination with this one.
     """
 
     redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
